@@ -3,4 +3,9 @@
     <string name="sign_in">Войти</string>
     <string name="sign_up">Зарегистрироваться</string>
     <string name="sign_out">Выйти</string>
+    <string name="save">Сохранить</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="phone">Телефон</string>
+    <string name="name">Имя</string>
 </resources>
