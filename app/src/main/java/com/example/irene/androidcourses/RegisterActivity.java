@@ -37,6 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
                 EditText password = findViewById(R.id.password);
                 //TODO: validate;
                 //validate();
+
                 mAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
                         .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override

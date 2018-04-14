@@ -8,4 +8,7 @@
     <string name="password">Пароль</string>
     <string name="phone">Телефон</string>
     <string name="name">Имя</string>
+    <string name="invalidName">Имя слишком короткое</string>
+    <string name="invalidPhone">Некорректный номер</string>
+    <string name="invalidEmail">Некорректный email</string>
 </resources>

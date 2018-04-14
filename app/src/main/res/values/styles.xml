@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MyAppTheme.TextInputLayout" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/red</item>
+    </style>
+
 </resources>
