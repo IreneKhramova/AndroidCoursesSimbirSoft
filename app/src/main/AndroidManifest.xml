@@ -9,17 +9,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AuthActivity"></activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".AuthActivity"
+            android:label="@string/login"/>
+        <activity android:name=".RegisterActivity"
+            android:label="@string/register"/>
         <activity android:name=".ProfileActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize"></activity>
+            android:label="@string/profile"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+        </activity>
     </application>
 
 </manifest>

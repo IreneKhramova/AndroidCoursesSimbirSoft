@@ -12,4 +12,6 @@
     <string name="invalidPhone">Некорректный номер</string>
     <string name="invalidEmail">Некорректный email</string>
     <string name="profile">Профиль</string>
+    <string name="register">Регистрация</string>
+    <string name="login">Вход</string>
 </resources>
