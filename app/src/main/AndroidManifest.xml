@@ -18,12 +18,15 @@
             </intent-filter>
         </activity>
         <activity android:name=".AuthActivity"
-            android:label="@string/login"/>
+            android:label="@string/login"
+            android:parentActivityName="com.example.irene.androidcourses.MainActivity" />
         <activity android:name=".RegisterActivity"
-            android:label="@string/register"/>
+            android:label="@string/register"
+            android:parentActivityName="com.example.irene.androidcourses.MainActivity"/>
         <activity android:name=".ProfileActivity"
             android:label="@string/profile"
-            android:windowSoftInputMode="stateHidden|adjustResize">
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:parentActivityName="com.example.irene.androidcourses.MainActivity">
         </activity>
     </application>
 

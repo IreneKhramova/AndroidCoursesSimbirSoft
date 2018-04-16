@@ -9,14 +9,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
+    private FirebaseAuth mAuth;
     private DrawerLayout mDrawerLayout;
-    private MenuItem exitItem;
-    private MenuItem loginItem;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
-        exitItem = findViewById(R.id.nav_exit);
-        loginItem = findViewById(R.id.login);
+        mAuth = FirebaseAuth.getInstance();
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         // set item as selected to persist highlight
-                        menuItem.setChecked(true);
+                        //menuItem.setChecked(true);
                         // close drawer when item is tapped
                         mDrawerLayout.closeDrawers();
 
@@ -55,10 +56,9 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             case R.id.nav_exit: {
-                                // TODO 6 названия кнопки меню "nav_exit" у неавторизованного пользователя
-                                // должно быть "Вход", у авторизованного "Выход".
                                 FirebaseAuth.getInstance().signOut();
-
+                                mMenu.findItem(R.id.nav_exit).setVisible(false);
+                                mMenu.findItem(R.id.login).setVisible(true);
                                 break;
                             }
 
@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+        mMenu = navigationView.getMenu();
+
     }
 
     @Override
@@ -84,5 +86,19 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if(mAuth.getCurrentUser() != null) {
+            mMenu.findItem(R.id.login).setVisible(false);
+            mMenu.findItem(R.id.nav_exit).setVisible(true);
+        }
+        else {
+            mMenu.findItem(R.id.nav_exit).setVisible(false);
+            mMenu.findItem(R.id.login).setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 }

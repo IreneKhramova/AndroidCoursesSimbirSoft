@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
     {
         if(user != null) {
             Context context = RegisterActivity.this;
-            Intent intent = new Intent(context, ProfileActivity.class);
+            Intent intent = new Intent(context, MainActivity.class);
             context.startActivity(intent);
         }
     }
