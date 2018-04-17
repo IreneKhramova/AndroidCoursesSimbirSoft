@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                                 FirebaseAuth.getInstance().signOut();
                                 mMenu.findItem(R.id.nav_exit).setVisible(false);
                                 mMenu.findItem(R.id.login).setVisible(true);
+                                mMenu.findItem(R.id.nav_manage).setVisible(false);
                                 break;
                             }
 
@@ -94,10 +95,12 @@ public class MainActivity extends AppCompatActivity {
         if(mAuth.getCurrentUser() != null) {
             mMenu.findItem(R.id.login).setVisible(false);
             mMenu.findItem(R.id.nav_exit).setVisible(true);
+            mMenu.findItem(R.id.nav_manage).setVisible(true);
         }
         else {
             mMenu.findItem(R.id.nav_exit).setVisible(false);
             mMenu.findItem(R.id.login).setVisible(true);
+            mMenu.findItem(R.id.nav_manage).setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
     }
