@@ -3,12 +3,12 @@ package com.example.irene.androidcourses;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class ProfileActivity extends AppCompatActivity {
     private Button saveBtn;
@@ -18,7 +18,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextInputLayout emailLayout;
     private TextInputLayout phoneLayout;
     private TextInputLayout nameLayout;
-
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +29,9 @@ public class ProfileActivity extends AppCompatActivity {
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*if ( isDataValid() ) {
+                //if ( isNameValid() && ) {
                     //
-                }*/
+                //}
             }
         });
 
@@ -63,6 +63,13 @@ public class ProfileActivity extends AppCompatActivity {
                 isPhoneValid();
             }
         });
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            emailEditText.setText(user.getEmail());
+            nameEditText.setText(user.getDisplayName());
+            phoneEditText.setText(user.getPhoneNumber());
+        }
     }
 
     private boolean isNameValid() {
