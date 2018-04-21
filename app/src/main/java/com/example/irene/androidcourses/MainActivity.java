@@ -11,9 +11,11 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DrawerLayout mDrawerLayout;
     private Menu mMenu;
+    private FirebaseUser user;
+    private TextView nameTextView;
+    private TextView emailTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +108,19 @@ public class MainActivity extends AppCompatActivity {
                 });
         mMenu = navigationView.getMenu();
 
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            nameTextView = navigationView.getHeaderView(0).findViewById(R.id.userNameView);
+            emailTextView = navigationView.getHeaderView(0).findViewById(R.id.userEmailView);
+            //nameTextView.setText();
+            emailTextView.setText(user.getEmail());
+        }
+        else {
+            Context context = MainActivity.this;
+            Intent intent = new Intent(context, AuthActivity.class);
+            context.startActivity(intent);
+        }
     }
 
     @Override
