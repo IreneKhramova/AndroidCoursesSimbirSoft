@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.irene.androidcourses">
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,7 +21,7 @@
             android:parentActivityName="com.example.irene.androidcourses.MainActivity" />
         <activity android:name=".RegisterActivity"
             android:label="@string/register"
-            android:parentActivityName="com.example.irene.androidcourses.MainActivity"/>
+            android:parentActivityName="com.example.irene.androidcourses.AuthActivity"/>
         <activity android:name=".ProfileActivity"
             android:label="@string/profile"
             android:windowSoftInputMode="stateHidden|adjustResize"

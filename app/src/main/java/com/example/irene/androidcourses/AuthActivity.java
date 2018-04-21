@@ -28,6 +28,7 @@ public class AuthActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         registerBtn = findViewById(R.id.register_btn);
         registerBtn.setOnClickListener(new View.OnClickListener() {
@@ -60,10 +61,7 @@ public class AuthActivity extends AppCompatActivity {
                                     Log.w(TAG, "signInWithEmail:failure", task.getException());
                                     Toast.makeText(AuthActivity.this, "Ошибка аутентификации.",
                                             Toast.LENGTH_SHORT).show();
-                                    //updateUI(null);
                                 }
-
-                                // ...
                             }
                         });
             }

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "728837566020-0v9vttlaoamusjibnci33qthglseeb2m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.irene.androidcourses",
+            "certificate_hash": "53120c434ae58e450224977c5686c32359ebcf81"
+          }
+        },
+        {
           "client_id": "728837566020-7khdfb5gllrcl628firtp58dus2ock8c.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728837566020-7khdfb5gllrcl628firtp58dus2ock8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
