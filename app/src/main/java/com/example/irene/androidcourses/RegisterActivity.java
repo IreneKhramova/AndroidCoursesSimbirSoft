@@ -17,6 +17,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -26,6 +28,8 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText passwdEditText;
     private TextInputLayout emailLayout;
     private TextInputLayout passwdLayout;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference usersRef = database.getReference().child("users");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         // Sign in success, update UI with the signed-in user's information
                                         FirebaseUser user = mAuth.getCurrentUser();
+                                        usersRef.child(user.getUid()).child("email").setValue(user.getEmail());
                                         Log.d(TAG, "createUserWithEmail:success");
                                         updateUI(user);
                                     } else {
@@ -87,7 +92,6 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
     }

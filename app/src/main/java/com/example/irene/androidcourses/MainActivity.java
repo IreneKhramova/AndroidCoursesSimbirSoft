@@ -103,15 +103,14 @@ public class MainActivity extends AppCompatActivity {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            emailTextView.setText(user.getEmail());
             usersRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()) {
+                    //if(dataSnapshot.exists()) {
                         User u = dataSnapshot.getValue(User.class);
                         nameTextView.setText(u.getName());
-                        //emailTextView.setText(u.getEmail());
-                    }
+                        emailTextView.setText(u.getEmail());
+                    //}
                 }
 
                 @Override
