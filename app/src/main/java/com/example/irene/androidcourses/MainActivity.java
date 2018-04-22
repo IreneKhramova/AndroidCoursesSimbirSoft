@@ -17,6 +17,11 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -26,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
     private Menu mMenu;
     private NavigationView navigationView;
     private FirebaseUser user;
-    //private TextView nameTextView;
+    private TextView nameTextView;
     private TextView emailTextView;
     private FriendsAdapter friendsAdapter;
     private RecyclerView recyclerView;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference usersRef = database.getReference().child("users");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
                                 mMenu.findItem(R.id.login).setVisible(true);
                                 mMenu.findItem(R.id.nav_manage).setVisible(false);
                                 recyclerView.setAdapter(null);
+                                emailTextView.setText("");
+                                nameTextView.setText("");
                                 break;
                             }
 
@@ -87,15 +96,30 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         mMenu = navigationView.getMenu();
+        nameTextView = navigationView.getHeaderView(0).findViewById(R.id.userNameView);
+        emailTextView = navigationView.getHeaderView(0).findViewById(R.id.userEmailView);
         recyclerView = findViewById(R.id.friends_list);
 
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            //nameTextView = navigationView.getHeaderView(0).findViewById(R.id.userNameView);
-            emailTextView = navigationView.getHeaderView(0).findViewById(R.id.userEmailView);
-            //nameTextView.setText();
             emailTextView.setText(user.getEmail());
+            usersRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.exists()) {
+                        User u = dataSnapshot.getValue(User.class);
+                        nameTextView.setText(u.getName());
+                        //emailTextView.setText(u.getEmail());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
 
             loadFriends();
         }
