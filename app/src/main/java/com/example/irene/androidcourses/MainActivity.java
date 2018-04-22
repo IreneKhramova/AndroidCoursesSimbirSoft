@@ -8,27 +8,28 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DrawerLayout mDrawerLayout;
     private Menu mMenu;
+    private NavigationView navigationView;
     private FirebaseUser user;
-    private TextView nameTextView;
+    //private TextView nameTextView;
     private TextView emailTextView;
+    private FriendsAdapter friendsAdapter;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,28 +39,6 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mAuth = FirebaseAuth.getInstance();
 
-        DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
-        connectedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                boolean connected = snapshot.getValue(Boolean.class);
-                if (connected) {
-                    System.out.println("connected");
-                    Toast.makeText(MainActivity.this, "con",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    System.out.println("not connected");
-                    Toast.makeText(MainActivity.this, "not con",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                System.err.println("Listener was cancelled");
-            }
-        });
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
@@ -67,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
 
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -92,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
                                 mMenu.findItem(R.id.nav_exit).setVisible(false);
                                 mMenu.findItem(R.id.login).setVisible(true);
                                 mMenu.findItem(R.id.nav_manage).setVisible(false);
+                                recyclerView.setAdapter(null);
                                 break;
                             }
 
@@ -107,21 +87,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         mMenu = navigationView.getMenu();
+        recyclerView = findViewById(R.id.friends_list);
 
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            nameTextView = navigationView.getHeaderView(0).findViewById(R.id.userNameView);
+            //nameTextView = navigationView.getHeaderView(0).findViewById(R.id.userNameView);
             emailTextView = navigationView.getHeaderView(0).findViewById(R.id.userEmailView);
             //nameTextView.setText();
             emailTextView.setText(user.getEmail());
-        }
-        else {
-            Context context = MainActivity.this;
-            Intent intent = new Intent(context, AuthActivity.class);
-            context.startActivity(intent);
+
+            loadFriends();
         }
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -131,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-
     }
 
 
@@ -148,5 +126,24 @@ public class MainActivity extends AppCompatActivity {
             mMenu.findItem(R.id.nav_manage).setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void loadFriends() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        friendsAdapter = new FriendsAdapter();
+        recyclerView.setAdapter(friendsAdapter);
+
+        final FriendsRepository friendsRepository = new FriendsRepository();
+        friendsRepository.loadFriends(new FriendsRepository.FriendsLoadListener() {
+            @Override
+            public void onFriendsLoaded(List<Friend> friends) {
+                friendsAdapter.setFriends(friends);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        });
     }
 }
