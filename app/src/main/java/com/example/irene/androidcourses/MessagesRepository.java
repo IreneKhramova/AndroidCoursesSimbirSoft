@@ -9,6 +9,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -16,10 +17,12 @@ import java.util.UUID;
 public class MessagesRepository {
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference messagesRef = database.getReference("messages");
+    Query query = database.getReference("messages").orderByChild("createdAt/time");
+
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     public void loadMessages(@NonNull final MessagesRepository.MessagesLoadListener messagesLoadListener) {
-        messagesRef.addChildEventListener(new ChildEventListener() {
+        query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 messagesLoadListener.onMessagesReceived(toMessageList(dataSnapshot));
