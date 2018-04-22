@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                                 mMenu.findItem(R.id.nav_exit).setVisible(false);
                                 mMenu.findItem(R.id.login).setVisible(true);
                                 mMenu.findItem(R.id.nav_manage).setVisible(false);
+                                mMenu.findItem(R.id.nav_map).setVisible(false);
                                 recyclerView.setAdapter(null);
                                 emailTextView.setText("");
                                 nameTextView.setText("");
@@ -87,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.login: {
                                 Context context = MainActivity.this;
                                 Intent intent = new Intent(context, AuthActivity.class);
+                                context.startActivity(intent);
+                                break;
+                            }
+
+                            case R.id.nav_map: {
+                                Context context = MainActivity.this;
+                                Intent intent = new Intent(context, MapsActivity.class);
                                 context.startActivity(intent);
                                 break;
                             }
@@ -106,11 +114,9 @@ public class MainActivity extends AppCompatActivity {
             usersRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    //if(dataSnapshot.exists()) {
-                        User u = dataSnapshot.getValue(User.class);
-                        nameTextView.setText(u.getName());
-                        emailTextView.setText(u.getEmail());
-                    //}
+                    User u = dataSnapshot.getValue(User.class);
+                    nameTextView.setText(u.getName());
+                    emailTextView.setText(u.getEmail());
                 }
 
                 @Override
@@ -142,11 +148,13 @@ public class MainActivity extends AppCompatActivity {
             mMenu.findItem(R.id.login).setVisible(false);
             mMenu.findItem(R.id.nav_exit).setVisible(true);
             mMenu.findItem(R.id.nav_manage).setVisible(true);
+            mMenu.findItem(R.id.nav_map).setVisible(true);
         }
         else {
             mMenu.findItem(R.id.nav_exit).setVisible(false);
             mMenu.findItem(R.id.login).setVisible(true);
             mMenu.findItem(R.id.nav_manage).setVisible(false);
+            mMenu.findItem(R.id.nav_map).setVisible(false);
         }
         return super.onPrepareOptionsMenu(menu);
     }

@@ -1,18 +1,60 @@
 package com.example.irene.androidcourses;
 
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import android.Manifest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private FirebaseUser firebaseUser;
+    private FirebaseDatabase database;
+    private DatabaseReference ref;
+    //private DatabaseReference coordRef;
+    private LocationCallback locationCallback;
+    //private List<LatLng> currentUserTrail = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +64,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        ref = database.getReference("users").child(firebaseUser.getUid());
+        //coordRef = database.getReference("coordinates");
+
+         locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    //Save new position to Firebase
+                    ref.child("latitude").setValue(location.getLatitude());
+                    ref.child("longitude").setValue(location.getLongitude());
+                    //Coordinates coord = new Coordinates(location.getLatitude(), location.getLongitude(), , firebaseUser.getUid())
+                    //coordRef.child(UUID.randomUUID().toString()).
+                }
+            };
+        };
     }
 
 
@@ -38,9 +102,192 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        enableMyLocation();
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+            return;
+        }
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        //Get last known location
+                        //In some rare situation can be null
+                        if (location != null) {
+                            //save location to Firebase
+                            ref.child("latitude").setValue(location.getLatitude());
+                            ref.child("longitude").setValue(location.getLongitude());
+                        }
+                    }
+                });
+        displayFriendsPosition();
+        checkCurrentLocationSettings();
+        startUpdateCurrentUserPosition();
+
+        //Polyline line = mMap.addPolyline(new PolylineOptions()
+            //.add(new LatLng(51.5,-0.1), new LatLng(40.7, -74.0)).width(5).color(Color.RED));
+        /*Polyline polyline = mMap.addPolyline(new PolylineOptions()
+        .add(currentUserTrail))*/
+        //line.setPoints(currentUserTrail);
+    }
+
+    private void enableMyLocation() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+        } else if (mMap != null) {
+            // Access to the location has been granted to the app.
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                if (permissions.length == 1 &&
+                        permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //отображаем текущую позицию пользователя
+                    enableMyLocation();
+                }
+            }
+        }
+    }
+
+
+    private void displayFriendsPosition() {
+        FirebaseDatabase.getInstance().getReference("users")
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        //add marker on the map
+                        String key = dataSnapshot.getKey();
+                        if(!key.equals(firebaseUser.getUid()) && dataSnapshot.child("latitude").exists() && dataSnapshot.child("longitude").exists()) {
+                            User user = dataSnapshot.getValue(User.class);
+                            LatLng friend = new LatLng(user.getLatitude(), user.getLongitude());
+                            mMap.addMarker(new MarkerOptions().position(friend).title(user.getName()));
+                        }
+                    }
+
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        //change marker position
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        //remove marker from the map
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                        //do nothing
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //do nothing
+                    }
+                });
+    }
+
+    private LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        //частота обновления
+        locationRequest.setInterval(10000);
+        //максимальная частота обновления
+        locationRequest.setFastestInterval(5000);
+        // точность
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        return locationRequest;
+    }
+
+    private void checkCurrentLocationSettings() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(createLocationRequest());
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        //...
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                //работаем с местоположением пользователя
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    //Location settings are not satisfied, but this can be fixed
+                    //by showing the user dialog
+                    try {
+                        //Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(MapsActivity.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        //Ignore the error
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK) {
+            //Работаем с местоположением пользователя
+        }
+    }
+
+    private void startUpdateCurrentUserPosition() {
+        if(ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+            return;
+        }
+        fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(), locationCallback, null);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startUpdateCurrentUserPosition();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopUpdateCurrentUserPosition();
+    }
+
+    private void stopUpdateCurrentUserPosition() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 }
