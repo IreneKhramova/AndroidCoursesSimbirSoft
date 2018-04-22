@@ -52,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (validator.isPasswordValid(passwdEditText.getText().toString())) {
                     passwdLayout.setErrorEnabled(false);
                 } else {
-                    passwdLayout.setError(getString(R.string.invalidPassword));
+                    passwdLayout.setError(getString(R.string.invalid_password));
                 }
             }
         });
