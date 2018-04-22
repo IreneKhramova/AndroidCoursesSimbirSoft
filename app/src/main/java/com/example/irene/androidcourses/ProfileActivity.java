@@ -26,6 +26,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextInputLayout phoneLayout;
     private TextInputLayout nameLayout;
     private FirebaseUser user;
+    private Validator validator;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference usersRef = database.getReference().child("users");
     private static final String TAG = "AndroidCourses";
@@ -42,6 +43,8 @@ public class ProfileActivity extends AppCompatActivity {
         emailLayout = findViewById(R.id.emailTextInputLayout);
         phoneLayout = findViewById(R.id.phoneTextInputLayout);
         nameLayout = findViewById(R.id.nameTextInputLayout);
+
+        validator = new Validator();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -62,7 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
                     // Failed to read value
                     Log.w(TAG, "Failed to read user.", error.toException());
                     Toast.makeText(ProfileActivity.this, "Ошибка",
-                                  Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -70,7 +73,10 @@ public class ProfileActivity extends AppCompatActivity {
             saveBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (isNameValid() && isEmailValid() && isPhoneValid()) {
+                    if (isDataValid()) {
+                        nameLayout.setErrorEnabled(false);
+                        emailLayout.setErrorEnabled(false);
+                        phoneLayout.setErrorEnabled(false);
 
                         User us = new User(nameEditText.getText().toString(), phoneEditText.getText().toString(), emailEditText.getText().toString());
                         usersRef.child(user.getUid()).setValue(us);
@@ -84,63 +90,44 @@ public class ProfileActivity extends AppCompatActivity {
             nameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean b) {
-                    isNameValid();
+                    if (validator.isNameValid(nameEditText.getText().toString())) {
+                        nameLayout.setErrorEnabled(false);
+                    } else {
+                        nameLayout.setError(getString(R.string.invalidName));
+                    }
                 }
             });
 
             emailEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean b) {
-                    isEmailValid();
+                    if (validator.isEmailValid(emailEditText.getText().toString())) {
+                        emailLayout.setErrorEnabled(false);
+                    } else {
+                        emailLayout.setError(getString(R.string.invalidEmail));
+                    }
                 }
             });
 
             phoneEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean b) {
-                    isPhoneValid();
+                    if (validator.isPhoneValid(phoneEditText.getText().toString())) {
+                        phoneLayout.setErrorEnabled(false);
+                    } else {
+                        phoneLayout.setError(getString(R.string.invalidPhone));
+                    }
                 }
             });
         }
     }
 
-    private boolean isNameValid() {
-        boolean result = true;
-
-        String name = nameEditText.getText().toString();
-        if (name == null || name.length() < 4) {
-            nameLayout.setError(getString(R.string.invalidName));
-            result = false;
-        } else {
-            nameLayout.setErrorEnabled(false);
+    public boolean isDataValid() {
+        if(validator.isNameValid(nameEditText.getText().toString()) &&
+                validator.isEmailValid(emailEditText.getText().toString()) &&
+                validator.isPhoneValid(phoneEditText.getText().toString())) {
+            return true;
         }
-        return result;
-    }
-
-    private boolean isPhoneValid() {
-        boolean result = true;
-
-        String phone = phoneEditText.getText().toString();
-        if (!(android.util.Patterns.PHONE.matcher(phone).matches())) {
-            phoneLayout.setError(getString(R.string.invalidPhone));
-            result = false;
-        } else {
-            phoneLayout.setErrorEnabled(false);
-        }
-        return result;
-    }
-
-    private boolean isEmailValid() {
-        boolean result = true;
-
-        String email = emailEditText.getText().toString();
-        if (!(android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())) {
-            emailLayout.setError(getString(R.string.invalidEmail));
-            result = false;
-        } else {
-            emailLayout.setErrorEnabled(false);
-        }
-
-        return result;
+        return false;
     }
 }

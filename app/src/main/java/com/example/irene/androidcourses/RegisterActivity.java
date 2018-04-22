@@ -28,6 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText passwdEditText;
     private TextInputLayout emailLayout;
     private TextInputLayout passwdLayout;
+    private Validator validator;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference usersRef = database.getReference().child("users");
 
@@ -43,17 +44,27 @@ public class RegisterActivity extends AppCompatActivity {
         emailLayout = findViewById(R.id.emailInput);
         passwdLayout = findViewById(R.id.passwordInput);
 
+        validator = new Validator();
+
         passwdEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                isPasswordValid();
+                if (validator.isPasswordValid(passwdEditText.getText().toString())) {
+                    passwdLayout.setErrorEnabled(false);
+                } else {
+                    passwdLayout.setError(getString(R.string.invalidPassword));
+                }
             }
         });
 
         emailEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                isEmailValid();
+                if (validator.isEmailValid(emailEditText.getText().toString())) {
+                    emailLayout.setErrorEnabled(false);
+                } else {
+                    emailLayout.setError(getString(R.string.invalidEmail));
+                }
             }
         });
 
@@ -62,11 +73,11 @@ public class RegisterActivity extends AppCompatActivity {
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditText email = findViewById(R.id.email);
-                EditText password = findViewById(R.id.password);
-                
-                if(isEmailValid() && isPasswordValid()) {
-                    mAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
+                if(isDataValid()) {
+                    emailLayout.setErrorEnabled(false);
+                    passwdLayout.setErrorEnabled(false);
+
+                    mAuth.createUserWithEmailAndPassword(emailEditText.getText().toString(), passwdEditText.getText().toString())
                             .addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -105,30 +116,11 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isPasswordValid() {
-        boolean result = true;
-
-        int passwdSize = passwdEditText.getText().length();
-        if (passwdSize < 6) {
-            passwdLayout.setError(getString(R.string.short_password));
-            result = false;
-        } else {
-            passwdLayout.setErrorEnabled(false);
+    public boolean isDataValid() {
+        if(validator.isEmailValid(emailEditText.getText().toString()) &&
+                validator.isPasswordValid(passwdEditText.getText().toString())) {
+            return true;
         }
-        return result;
-    }
-
-    private boolean isEmailValid() {
-        boolean result = true;
-
-        String email = emailEditText.getText().toString();
-        if (!(android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())) {
-            emailLayout.setError(getString(R.string.invalidEmail));
-            result = false;
-        } else {
-            emailLayout.setErrorEnabled(false);
-        }
-
-        return result;
+        return false;
     }
 }
