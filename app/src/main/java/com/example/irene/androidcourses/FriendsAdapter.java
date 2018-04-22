@@ -1,5 +1,7 @@
 package com.example.irene.androidcourses;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,10 +68,9 @@ public class FriendsAdapter extends
 
         @Override
         public void onClick(View v) {
-            //переход в др активити
-            /*final Context a = v.getContext();
+            final Context a = v.getContext();
             Intent intent = new Intent(a, MessagesListActivity.class);
-            a.startActivity(intent);*/
+            a.startActivity(intent);
         }
     }
 }

@@ -16,5 +16,5 @@
     <string name="login">Вход</string>
     <string name="invalid_password">Пароль слишком короткий</string>
     <string name="messages">Сообщения</string>
-    <string name="hint_enter_a_message">Сообщения</string>
+    <string name="hint_enter_a_message">Введите текст</string>
 </resources>

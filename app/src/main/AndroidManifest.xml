@@ -27,6 +27,9 @@
             android:windowSoftInputMode="stateHidden|adjustResize"
             android:parentActivityName="com.example.irene.androidcourses.MainActivity">
         </activity>
+        <activity android:name=".MessagesListActivity"
+            android:label="@string/messages"
+            android:parentActivityName="com.example.irene.androidcourses.MainActivity"/>
     </application>
 
 </manifest>
