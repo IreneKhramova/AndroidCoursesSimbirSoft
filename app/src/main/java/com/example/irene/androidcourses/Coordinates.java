@@ -1,16 +1,14 @@
 package com.example.irene.androidcourses;
 
-import java.sql.Timestamp;
-
 public class Coordinates {
     private String user;
-    private Timestamp timestamp;
+    private long timestamp;
     private double latitude;
     private double longitude;
 
     public Coordinates() {}
 
-    public Coordinates(double latitude, double longitude, Timestamp timestamp, String user) {
+    public Coordinates(double latitude, double longitude, long timestamp, String user) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
@@ -29,7 +27,7 @@ public class Coordinates {
         this.user = user;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -45,7 +43,7 @@ public class Coordinates {
         return user;
     }
 
-    public Timestamp getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 }

@@ -36,10 +36,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import android.Manifest;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,9 +52,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FirebaseUser firebaseUser;
     private FirebaseDatabase database;
     private DatabaseReference ref;
-    //private DatabaseReference coordRef;
+    private DatabaseReference coordRef;
     private LocationCallback locationCallback;
-    //private List<LatLng> currentUserTrail = new ArrayList<>();
+    private Polyline polyline;
+    private PolylineOptions lineOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
         ref = database.getReference("users").child(firebaseUser.getUid());
-        //coordRef = database.getReference("coordinates");
+        coordRef = database.getReference("coordinates");
 
          locationCallback = new LocationCallback() {
             @Override
@@ -81,11 +82,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //Save new position to Firebase
                     ref.child("latitude").setValue(location.getLatitude());
                     ref.child("longitude").setValue(location.getLongitude());
-                    //Coordinates coord = new Coordinates(location.getLatitude(), location.getLongitude(), , firebaseUser.getUid())
-                    //coordRef.child(UUID.randomUUID().toString()).
+
+                    //TODO: записывать, только если отличаются от последних
+                    Coordinates coord = new Coordinates(location.getLatitude(), location.getLongitude(), System.currentTimeMillis(), firebaseUser.getUid());
+                    coordRef.child(UUID.randomUUID().toString()).setValue(coord);
                 }
             };
         };
+
+        Query query = database.getReference("coordinates").orderByChild("timestamp/time");
+        query.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                //TODO: для других пользователей тоже сделать
+                Coordinates coordinates = dataSnapshot.getValue(Coordinates.class);
+                if(coordinates.getUser().equals(firebaseUser.getUid())) {
+                    LatLng coord = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
+
+                    List<LatLng> currentUserTrail = polyline.getPoints();
+                    currentUserTrail.add(coord);
+                    polyline.setPoints(currentUserTrail);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 
@@ -133,11 +172,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         checkCurrentLocationSettings();
         startUpdateCurrentUserPosition();
 
-        //Polyline line = mMap.addPolyline(new PolylineOptions()
-            //.add(new LatLng(51.5,-0.1), new LatLng(40.7, -74.0)).width(5).color(Color.RED));
-        /*Polyline polyline = mMap.addPolyline(new PolylineOptions()
-        .add(currentUserTrail))*/
-        //line.setPoints(currentUserTrail);
+        lineOptions = new PolylineOptions().width(5).color(Color.RED);
+        polyline = mMap.addPolyline(lineOptions);
     }
 
     private void enableMyLocation() {
@@ -210,9 +246,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
         //частота обновления
-        locationRequest.setInterval(10000);
+        locationRequest.setInterval(60000);
         //максимальная частота обновления
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setFastestInterval(10000);
         // точность
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
