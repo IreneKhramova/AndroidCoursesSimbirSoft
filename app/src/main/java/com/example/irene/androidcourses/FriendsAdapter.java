@@ -12,6 +12,8 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class FriendsAdapter extends
@@ -20,6 +22,14 @@ public class FriendsAdapter extends
 
     public void setFriends(List<Friend> friends) {
         this.friends = friends;
+
+        Collections.sort(friends, new Comparator<Friend>() {
+            @Override
+            public int compare(Friend lhs, Friend rhs) {
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
+
         notifyDataSetChanged();//использовать и др.методы
     }
 
