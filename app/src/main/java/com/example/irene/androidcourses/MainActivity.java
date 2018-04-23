@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -125,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
             loadFriends();
         }
     }
@@ -168,7 +168,12 @@ public class MainActivity extends AppCompatActivity {
         friendsRepository.loadFriends(new FriendsRepository.FriendsLoadListener() {
             @Override
             public void onFriendsLoaded(List<Friend> friends) {
+                FriendsDiffCallback friendsDiffCallback = new FriendsDiffCallback(friendsAdapter.getFriends(), friends);
+                DiffUtil.DiffResult friendsDiffResult = DiffUtil.calculateDiff(friendsDiffCallback);
+
                 friendsAdapter.setFriends(friends);
+
+                friendsDiffResult.dispatchUpdatesTo(friendsAdapter);
             }
 
             @Override

@@ -29,8 +29,6 @@ public class FriendsAdapter extends
                 return lhs.getName().compareTo(rhs.getName());
             }
         });
-
-        notifyDataSetChanged();//использовать и др.методы
     }
 
     @Override
@@ -50,6 +48,9 @@ public class FriendsAdapter extends
         return friends.size();
     }
 
+    public List<Friend> getFriends() {
+        return friends;
+    }
 
     public class FriendsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView message;
@@ -72,7 +73,7 @@ public class FriendsAdapter extends
             message.setText(friend.getMessage());
             name.setText(friend.getName());
             date.setText(friend.getDate());
-            messages_badge.setText(friend.getId().toString());
+            messages_badge.setText(friend.getMessagesBadge().toString());
             Picasso.get().load(friend.getAvatar()).into(avatar);
         }
 

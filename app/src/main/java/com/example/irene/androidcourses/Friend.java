@@ -6,6 +6,7 @@ public class Friend {
     private String date;
     private String message;
     private String name;
+    private Long messagesBadge;
 
     public Friend() {}
 
@@ -27,5 +28,9 @@ public class Friend {
 
     public String getAvatar() {
         return avatar;
+    }
+
+    public Long getMessagesBadge() {
+        return messagesBadge;
     }
 }
