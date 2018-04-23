@@ -40,7 +40,10 @@ import com.google.firebase.database.Query;
 
 import android.Manifest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -54,8 +57,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DatabaseReference ref;
     private DatabaseReference coordRef;
     private LocationCallback locationCallback;
-    private Polyline polyline;
     private PolylineOptions lineOptions;
+    Map<String, Polyline> polylines = new HashMap<String, Polyline>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +86,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ref.child("latitude").setValue(location.getLatitude());
                     ref.child("longitude").setValue(location.getLongitude());
 
-                    //TODO: записывать, только если отличаются от последних
                     Coordinates coord = new Coordinates(location.getLatitude(), location.getLongitude(), System.currentTimeMillis(), firebaseUser.getUid());
                     coordRef.child(UUID.randomUUID().toString()).setValue(coord);
                 }
@@ -94,14 +96,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                //TODO: для других пользователей тоже сделать
                 Coordinates coordinates = dataSnapshot.getValue(Coordinates.class);
-                if(coordinates.getUser().equals(firebaseUser.getUid())) {
-                    LatLng coord = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
+                LatLng coord = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
 
-                    List<LatLng> currentUserTrail = polyline.getPoints();
-                    currentUserTrail.add(coord);
-                    polyline.setPoints(currentUserTrail);
+                String userUid = dataSnapshot.child("user").getValue().toString();
+                Polyline line = polylines.get(userUid);
+
+                if(line == null) {
+                    Random rand = new Random();
+                    int r = rand.nextInt(255);
+                    int g = rand.nextInt(255);
+                    int b = rand.nextInt(255);
+                    int randomColor = Color.rgb(r,g,b);
+                    lineOptions.color(randomColor);
+                    polylines.put(dataSnapshot.child("user").getValue().toString(), mMap.addPolyline(lineOptions));
+                }
+                else {
+                    List<LatLng> userTrail = line.getPoints();
+                    userTrail.add(coord);
+                    line.setPoints(userTrail);
+                    polylines.put(userUid, line);
                 }
             }
 
@@ -172,8 +186,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         checkCurrentLocationSettings();
         startUpdateCurrentUserPosition();
 
-        lineOptions = new PolylineOptions().width(5).color(Color.RED);
-        polyline = mMap.addPolyline(lineOptions);
+        lineOptions = new PolylineOptions().width(5).color(Color.BLUE);
     }
 
     private void enableMyLocation() {
@@ -213,10 +226,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         //add marker on the map
                         String key = dataSnapshot.getKey();
-                        if(!key.equals(firebaseUser.getUid()) && dataSnapshot.child("latitude").exists() && dataSnapshot.child("longitude").exists()) {
-                            User user = dataSnapshot.getValue(User.class);
-                            LatLng friend = new LatLng(user.getLatitude(), user.getLongitude());
-                            mMap.addMarker(new MarkerOptions().position(friend).title(user.getName()));
+                        if(dataSnapshot.child("latitude").exists() && dataSnapshot.child("longitude").exists()) {
+                            if(!key.equals(firebaseUser.getUid())) {
+                                User user = dataSnapshot.getValue(User.class);
+                                LatLng friend = new LatLng(user.getLatitude(), user.getLongitude());
+                                mMap.addMarker(new MarkerOptions().position(friend).title(user.getName()));
+                            }
                         }
                     }
 
