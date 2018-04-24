@@ -92,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             };
         };
 
-        Query query = database.getReference("coordinates").orderByChild("timestamp/time");
+        Query query = database.getReference("coordinates").orderByChild("timestamp");
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
