@@ -1,12 +1,20 @@
 package com.example.irene.androidcourses;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,6 +25,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import android.Manifest;
+
 public class ProfileActivity extends AppCompatActivity {
     private Button saveBtn;
     private EditText emailEditText;
@@ -25,11 +35,14 @@ public class ProfileActivity extends AppCompatActivity {
     private TextInputLayout emailLayout;
     private TextInputLayout phoneLayout;
     private TextInputLayout nameLayout;
+    private ImageView avatarView;
     private FirebaseUser user;
     private Validator validator;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference usersRef = database.getReference().child("users");
     private static final String TAG = "AndroidCourses";
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +56,24 @@ public class ProfileActivity extends AppCompatActivity {
         emailLayout = findViewById(R.id.emailTextInputLayout);
         phoneLayout = findViewById(R.id.phoneTextInputLayout);
         nameLayout = findViewById(R.id.nameTextInputLayout);
+        avatarView = findViewById(R.id.avatar);
+
+        avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(ProfileActivity.this,
+                        Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(ProfileActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            MY_PERMISSIONS_REQUEST_CAMERA);
+                }
+                else {
+                    dispatchTakePictureIntent();
+                }
+            }
+        });
+
 
         validator = new Validator();
 
@@ -129,5 +160,35 @@ public class ProfileActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            avatarView.setImageBitmap(imageBitmap);
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMERA: {
+                if (permissions.length == 1 &&
+                        permissions[0].equals(Manifest.permission.CAMERA) &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchTakePictureIntent();
+                }
+            }
+        }
     }
 }
