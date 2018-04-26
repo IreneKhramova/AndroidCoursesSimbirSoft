@@ -1,17 +1,20 @@
 package com.example.irene.androidcourses;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView emailTextView;
     private FriendsAdapter friendsAdapter;
     private RecyclerView recyclerView;
+    private ItemTouchHelper itemTouchHelper;
+    private ItemTouchHelper.SimpleCallback simpleCallback;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference usersRef = database.getReference().child("users");
 
@@ -128,6 +133,40 @@ public class MainActivity extends AppCompatActivity {
 
             loadFriends();
         }
+
+        simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
+                final int position = viewHolder.getAdapterPosition(); //get position which is swipe
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("Удалить диалог?");
+
+                    builder.setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            friendsAdapter.notifyItemRemoved(position);
+                            List<Friend> friends = friendsAdapter.getFriends();
+                            friends.remove(position);
+                            friendsAdapter.setFriends(friends);
+                            return;
+                        }
+                    }).setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            friendsAdapter.notifyItemRemoved(position + 1);
+                            friendsAdapter.notifyItemRangeChanged(position, friendsAdapter.getItemCount());
+                            return;
+                        }
+                    }).show();
+            }
+        };
+        itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
 
