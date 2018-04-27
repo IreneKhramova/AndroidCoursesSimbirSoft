@@ -1,13 +1,11 @@
 package com.example.irene.androidcourses;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
@@ -27,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private FriendsAdapter friendsAdapter;
     private RecyclerView recyclerView;
     private ItemTouchHelper itemTouchHelper;
-    private ItemTouchHelper.SimpleCallback simpleCallback;
+    private ItemTouchHelper.SimpleCallback friendsCallback;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference usersRef = database.getReference().child("users");
 
@@ -134,38 +133,31 @@ public class MainActivity extends AppCompatActivity {
             loadFriends();
         }
 
-        simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        friendsCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
+                List<Friend> friends = friendsAdapter.getFriends();
+                // get the viewHolder's and target's positions in adapter data, swap them
+                Collections.swap(friends, viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                friendsAdapter.setFriends(friends);
+                // and notify the adapter that its dataset has changed
+                friendsAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                return true;
             }
 
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getAdapterPosition(); //get position which is swipe
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage("Удалить диалог?");
 
-                    builder.setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            friendsAdapter.notifyItemRemoved(position);
-                            List<Friend> friends = friendsAdapter.getFriends();
-                            friends.remove(position);
-                            friendsAdapter.setFriends(friends);
-                            return;
-                        }
-                    }).setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            friendsAdapter.notifyItemRemoved(position + 1);
-                            friendsAdapter.notifyItemRangeChanged(position, friendsAdapter.getItemCount());
-                            return;
-                        }
-                    }).show();
+                friendsAdapter.notifyItemRemoved(position);
+                List<Friend> friends = friendsAdapter.getFriends();
+                friends.remove(position);
+                friendsAdapter.setFriends(friends);
+                return;
             }
         };
-        itemTouchHelper = new ItemTouchHelper(simpleCallback);
+
+        itemTouchHelper = new ItemTouchHelper(friendsCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
