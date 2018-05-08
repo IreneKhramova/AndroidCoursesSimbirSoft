@@ -28,6 +28,12 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Collections;
 import java.util.List;
 
+    /*
+    При написании кода нужно руководствоваться кодстайлом гугла и стайлгайдом по android
+    https://google.github.io/styleguide/javaguide.html
+    https://github.com/ribot/android-guidelines/blob/master/project_and_code_guidelines.md
+    */
+
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DrawerLayout mDrawerLayout;
@@ -120,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     User u = dataSnapshot.getValue(User.class);
+                    if (u == null) return;
                     nameTextView.setText(u.getName());
                     emailTextView.setText(u.getEmail());
                 }
@@ -176,6 +183,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if(mAuth.getCurrentUser() != null) {
+            // По факту эти 4 строки повторяются в классе 3 раза
+            // Лучше вынести их в отдельный метод, который будет принимать на вход
+            // boolean и например выставлять у всех пунктов меню пришедшее значение,
+            // а у меню логина обратное
             mMenu.findItem(R.id.login).setVisible(false);
             mMenu.findItem(R.id.nav_exit).setVisible(true);
             mMenu.findItem(R.id.nav_manage).setVisible(true);

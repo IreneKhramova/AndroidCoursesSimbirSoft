@@ -261,6 +261,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
         //частота обновления
+        //Желательно магические числа выносить в константы
         locationRequest.setInterval(60000);
         //максимальная частота обновления
         locationRequest.setFastestInterval(10000);

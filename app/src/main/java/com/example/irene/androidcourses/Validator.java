@@ -2,6 +2,7 @@ package com.example.irene.androidcourses;
 
 public class Validator {
 
+    // в принципе все методы класса можно сделать статическими
     public boolean isNameValid(String name) {
         if (name == null || name.length() < 4) {
             return false;

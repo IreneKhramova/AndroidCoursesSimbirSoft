@@ -23,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Button registerBtn;
+    // статические поля лучше объявлять отдельно от нестатических
     private static final String TAG = "AndroidCourses";
     private EditText emailEditText;
     private EditText passwdEditText;
@@ -116,6 +117,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    // логичнее этот метод перенести в класс валидатора
     public boolean isDataValid() {
         if(validator.isEmailValid(emailEditText.getText().toString()) &&
                 validator.isPasswordValid(passwdEditText.getText().toString())) {

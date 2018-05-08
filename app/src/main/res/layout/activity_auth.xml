@@ -6,6 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".AuthActivity">
 
+    <!--
+    Лучше давать вьюшкам более осмысленные id.
+    Например emailTextInputLayout-->
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputLayout"
         android:layout_width="match_parent"

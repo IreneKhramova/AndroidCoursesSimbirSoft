@@ -3,8 +3,12 @@
     <color name="colorPrimary">#579C3B</color>
     <color name="colorPrimaryDark">#579C3B</color>
     <color name="colorAccent">#6db94b</color>
+    <!--Лучше придерживаться одного стиля именования.
+    илиТак или_так-->
     <color name="windowBackground">#ffffff</color>
 
+    <!--Лучше не привязывать имена цветов к каким-то конкретным элементам, drawer'ам,
+    кнопкам и тд. В данном случае лучше назвать просто gray-->
     <color name="drawer_text">#4c4c4c</color>
     <color name="underline">#d8d8d8</color>
 

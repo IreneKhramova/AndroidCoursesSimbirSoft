@@ -47,7 +47,8 @@ public class MessagesListActivity extends AppCompatActivity {
             }
         });
 
-
+        // Куча лишних пробелов.
+        // Вообще, если выделить весь код файла (Ctrl + A)
 
 
         inputView = findViewById(R.id.input);

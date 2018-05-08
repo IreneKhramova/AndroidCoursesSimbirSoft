@@ -21,6 +21,9 @@ public class FriendsAdapter extends
     private List<Friend> friends = new ArrayList<>();
 
     public void setFriends(List<Friend> friends) {
+        // Правильнее написать так
+        // this.friends.clear();
+        // this.friends.addAll(friends);
         this.friends = friends;
 
         Collections.sort(friends, new Comparator<Friend>() {
@@ -79,6 +82,7 @@ public class FriendsAdapter extends
 
         @Override
         public void onClick(View v) {
+            // Имя переменной желательно должно быть более осмысленным
             final Context a = v.getContext();
             Intent intent = new Intent(a, MessagesListActivity.class);
             a.startActivity(intent);

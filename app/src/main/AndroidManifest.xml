@@ -26,6 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--Между элементами (в данном случае разными активити) лучше оставлять пустую строку,
+        чтобы было проще читать код-->
         <activity
             android:name=".AuthActivity"
             android:label="@string/login"
@@ -34,6 +36,9 @@
             android:name=".RegisterActivity"
             android:label="@string/register"
             android:parentActivityName=".AuthActivity" />
+        <!--Обращай внимание на замечания Lint'а. Он подсвечивает желтым, что можно поправить.
+        Если поставить курсор внутрь подсвеченного кода и нажать Alt+Enter, то тебе предложат
+        исправить код автоматически-->
         <activity
             android:name=".ProfileActivity"
             android:label="@string/profile"
