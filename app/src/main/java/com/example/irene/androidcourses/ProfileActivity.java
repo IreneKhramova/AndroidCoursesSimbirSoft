@@ -153,6 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    // и этот метод лучше перенести в класс валидатора)
     public boolean isDataValid() {
         if(validator.isNameValid(nameEditText.getText().toString()) &&
                 validator.isEmailValid(emailEditText.getText().toString()) &&
